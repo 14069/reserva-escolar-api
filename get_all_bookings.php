@@ -32,8 +32,10 @@ $selectSql = "
         b.purpose,
         b.status,
         b.cancelled_at,
+        b.completed_at,
         r.name AS resource_name,
         u.name AS user_name,
+        uc.name AS completed_by_name,
         cg.name AS class_group_name,
         s.name AS subject_name
 ";
@@ -42,6 +44,7 @@ $fromSql = "
     FROM bookings b
     INNER JOIN resources r ON r.id = b.resource_id
     INNER JOIN users u ON u.id = b.user_id
+    LEFT JOIN users uc ON uc.id = b.completed_by_user_id
     INNER JOIN class_groups cg ON cg.id = b.class_group_id
     INNER JOIN subjects s ON s.id = b.subject_id
     WHERE b.school_id = ?
@@ -124,6 +127,7 @@ if ($shouldPaginate) {
             SUM(CASE WHEN b.status = 'scheduled' THEN 1 ELSE 0 END) AS scheduled_count,
             SUM(CASE WHEN b.status = 'completed' THEN 1 ELSE 0 END) AS completed_count,
             SUM(CASE WHEN b.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_count,
+            SUM(CASE WHEN b.status = 'completed' AND DATE(b.completed_at) = CURRENT_DATE() THEN 1 ELSE 0 END) AS completed_today_count,
             COUNT(DISTINCT u.id) AS unique_teachers_count,
             COUNT(DISTINCT r.id) AS unique_resources_count,
             COUNT(DISTINCT cg.id) AS unique_class_groups_count,
@@ -285,6 +289,7 @@ if ($shouldPaginate) {
                 'scheduled_count' => (int) ($summaryRow['scheduled_count'] ?? 0),
                 'completed_count' => (int) ($summaryRow['completed_count'] ?? 0),
                 'cancelled_count' => (int) ($summaryRow['cancelled_count'] ?? 0),
+                'completed_today_count' => (int) ($summaryRow['completed_today_count'] ?? 0),
                 'overall_count' => $overallCount,
                 'unique_teachers_count' => (int) ($summaryRow['unique_teachers_count'] ?? 0),
                 'unique_resources_count' => (int) ($summaryRow['unique_resources_count'] ?? 0),

@@ -28,7 +28,9 @@ $selectSql = "
         b.purpose,
         b.status,
         b.cancelled_at,
+        b.completed_at,
         r.name AS resource_name,
+        uc.name AS completed_by_name,
         cg.name AS class_group_name,
         s.name AS subject_name
 ";
@@ -36,6 +38,7 @@ $selectSql = "
 $fromSql = "
     FROM bookings b
     INNER JOIN resources r ON r.id = b.resource_id
+    LEFT JOIN users uc ON uc.id = b.completed_by_user_id
     INNER JOIN class_groups cg ON cg.id = b.class_group_id
     INNER JOIN subjects s ON s.id = b.subject_id
     WHERE b.school_id = ?

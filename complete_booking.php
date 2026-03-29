@@ -60,11 +60,13 @@ if ($bookingDate === '' || $bookingDate > $today) {
 try {
     $updateStmt = $pdo->prepare("
         UPDATE bookings
-        SET status = 'completed'
+        SET status = 'completed',
+            completed_at = NOW(),
+            completed_by_user_id = ?
         WHERE id = ?
           AND school_id = ?
     ");
-    $updateStmt->execute([$bookingId, $schoolId]);
+    $updateStmt->execute([$userId, $bookingId, $schoolId]);
 } catch (PDOException $e) {
     error_log('Complete booking failed: ' . $e->getMessage());
     jsonResponse(
