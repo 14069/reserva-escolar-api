@@ -42,6 +42,10 @@ if ($result['status'] === 'cancelled') {
     jsonResponse(false, "Este agendamento já foi cancelado.", null, 400);
 }
 
+if ($result['status'] === 'completed') {
+    jsonResponse(false, "Agendamentos finalizados não podem ser cancelados.", null, 400);
+}
+
 if ((int)$result['user_id'] !== (int)$userId && $result['role'] !== 'technician') {
     jsonResponse(false, "Você não tem permissão para cancelar este agendamento.", null, 403);
 }

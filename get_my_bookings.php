@@ -84,7 +84,8 @@ if ($shouldPaginate) {
         SELECT
             COUNT(*) AS total,
             SUM(CASE WHEN b.status = 'scheduled' THEN 1 ELSE 0 END) AS scheduled_count,
-            SUM(CASE WHEN b.status <> 'scheduled' THEN 1 ELSE 0 END) AS cancelled_count
+            SUM(CASE WHEN b.status = 'completed' THEN 1 ELSE 0 END) AS completed_count,
+            SUM(CASE WHEN b.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_count
         " . $fromSql);
     $summaryStmt->execute($params);
     $summaryRow = $summaryStmt->fetch(PDO::FETCH_ASSOC) ?: [];
@@ -127,6 +128,7 @@ if ($shouldPaginate) {
             $pagination['page_size'],
             [
                 'scheduled_count' => (int) ($summaryRow['scheduled_count'] ?? 0),
+                'completed_count' => (int) ($summaryRow['completed_count'] ?? 0),
                 'cancelled_count' => (int) ($summaryRow['cancelled_count'] ?? 0),
             ]
         )

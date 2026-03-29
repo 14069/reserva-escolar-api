@@ -122,7 +122,8 @@ if ($shouldPaginate) {
         SELECT
             COUNT(*) AS total,
             SUM(CASE WHEN b.status = 'scheduled' THEN 1 ELSE 0 END) AS scheduled_count,
-            SUM(CASE WHEN b.status <> 'scheduled' THEN 1 ELSE 0 END) AS cancelled_count,
+            SUM(CASE WHEN b.status = 'completed' THEN 1 ELSE 0 END) AS completed_count,
+            SUM(CASE WHEN b.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_count,
             COUNT(DISTINCT u.id) AS unique_teachers_count,
             COUNT(DISTINCT r.id) AS unique_resources_count,
             COUNT(DISTINCT cg.id) AS unique_class_groups_count,
@@ -282,6 +283,7 @@ if ($shouldPaginate) {
             $pagination['page_size'],
             [
                 'scheduled_count' => (int) ($summaryRow['scheduled_count'] ?? 0),
+                'completed_count' => (int) ($summaryRow['completed_count'] ?? 0),
                 'cancelled_count' => (int) ($summaryRow['cancelled_count'] ?? 0),
                 'overall_count' => $overallCount,
                 'unique_teachers_count' => (int) ($summaryRow['unique_teachers_count'] ?? 0),
