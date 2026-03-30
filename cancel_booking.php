@@ -2,6 +2,8 @@
 require_once 'response.php';
 require_once 'db.php';
 
+$currentTimestampExpression = getCurrentTimestampExpression();
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse(false, "Método não permitido.", null, 405);
 }
@@ -53,7 +55,7 @@ if ((int)$result['user_id'] !== (int)$userId && $result['role'] !== 'technician'
 $updateStmt = $pdo->prepare("
     UPDATE bookings
     SET status = 'cancelled',
-        cancelled_at = NOW(),
+        cancelled_at = $currentTimestampExpression,
         cancelled_by_user_id = ?
     WHERE id = ?
       AND school_id = ?
