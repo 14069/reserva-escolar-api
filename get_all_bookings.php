@@ -2,6 +2,11 @@
 require_once 'response.php';
 require_once 'db.php';
 
+$formattedBookingDateExpression = getFormattedDateSearchExpression('b.booking_date');
+$completedAtDateExpression = getDateOnlyExpression('b.completed_at');
+$currentDateExpression = getCurrentDateExpression();
+$weekdayIndexExpression = getWeekdayIndexExpression('b.booking_date');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     jsonResponse(false, "Método não permitido.", null, 405);
 }
@@ -94,7 +99,7 @@ if ($search !== '') {
         OR cg.name LIKE ?
         OR s.name LIKE ?
         OR b.purpose LIKE ?
-        OR DATE_FORMAT(b.booking_date, '%d/%m/%Y') LIKE ?
+        OR $formattedBookingDateExpression LIKE ?
     )";
     $searchParam = '%' . $search . '%';
     $params[] = $searchParam;
@@ -127,7 +132,7 @@ if ($shouldPaginate) {
             SUM(CASE WHEN b.status = 'scheduled' THEN 1 ELSE 0 END) AS scheduled_count,
             SUM(CASE WHEN b.status = 'completed' THEN 1 ELSE 0 END) AS completed_count,
             SUM(CASE WHEN b.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_count,
-            SUM(CASE WHEN b.status = 'completed' AND DATE(b.completed_at) = CURRENT_DATE() THEN 1 ELSE 0 END) AS completed_today_count,
+            SUM(CASE WHEN b.status = 'completed' AND $completedAtDateExpression = $currentDateExpression THEN 1 ELSE 0 END) AS completed_today_count,
             COUNT(DISTINCT u.id) AS unique_teachers_count,
             COUNT(DISTINCT r.id) AS unique_resources_count,
             COUNT(DISTINCT cg.id) AS unique_class_groups_count,
@@ -159,7 +164,7 @@ if ($shouldPaginate) {
 
     $weekdayStmt = $pdo->prepare("
         SELECT
-            WEEKDAY(b.booking_date) AS weekday_index,
+            $weekdayIndexExpression AS weekday_index,
             COUNT(*) AS total
         " . $fromSql . "
         GROUP BY weekday_index

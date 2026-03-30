@@ -2,6 +2,8 @@
 require_once 'response.php';
 require_once 'db.php';
 
+$currentTimestampExpression = getCurrentTimestampExpression();
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse(false, "Método não permitido.", null, 405);
 }
@@ -61,7 +63,7 @@ try {
     $updateStmt = $pdo->prepare("
         UPDATE bookings
         SET status = 'completed',
-            completed_at = NOW(),
+            completed_at = $currentTimestampExpression,
             completed_by_user_id = ?
         WHERE id = ?
           AND school_id = ?

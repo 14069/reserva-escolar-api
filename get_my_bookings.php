@@ -2,6 +2,8 @@
 require_once 'response.php';
 require_once 'db.php';
 
+$formattedBookingDateExpression = getFormattedDateSearchExpression('b.booking_date');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     jsonResponse(false, "Método não permitido.", null, 405);
 }
@@ -57,7 +59,7 @@ if ($search !== '') {
         OR cg.name LIKE ?
         OR s.name LIKE ?
         OR b.purpose LIKE ?
-        OR DATE_FORMAT(b.booking_date, '%d/%m/%Y') LIKE ?
+        OR $formattedBookingDateExpression LIKE ?
     )";
     $searchParam = '%' . $search . '%';
     $params[] = $searchParam;
